@@ -620,3 +620,6 @@
 </script>
 </body>
 </html>
+git mv image.png image.html
+git commit -m "переименован файл из png в html"
+git push
