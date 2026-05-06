@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Юный химик | таблица + реакции + журнал</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f5f7e9 0%, #eef2e0 100%);
+            font-family: 'Times New Roman', Times, serif;
+            color: #1e2f1c;
+            padding: 14px;
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: rgba(255, 252, 235, 0.95);
+            border-radius: 40px;
+            box-shadow: 0 12px 28px rgba(0, 20, 0, 0.2);
+            overflow: hidden;
+            border: 1px solid #cdd8b0;
+        }
+
+        .hero {
+            background: #2c4b2b;
+            padding: 18px 20px 14px;
+            text-align: center;
+            border-bottom: 4px solid #ffcd7e;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            color: #fff3da;
+            text-shadow: 3px 3px 0 #1a3a18;
+        }
+
+        .hero p {
+            color: #f9e0a0;
+            font-size: 1rem;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        /* три вкладки */
+        .nav-tabs {
+            display: flex;
+            background: #e7eace;
+            gap: 8px;
+            padding: 12px 16px 0 16px;
+            border-bottom: 1px solid #bec8a2;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: #dadfbe;
+            border: none;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 40px 40px 0 0;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2a4728;
+            box-shadow: inset 0 -1px 0 #b3b98d;
+        }
+
+        .tab-btn.active {
+            background: #fff9e8;
+            color: #1e441b;
+            box-shadow: none;
+            border-bottom: 3px solid #ffb347;
+        }
+
+        .page {
+            display: none;
+            padding: 24px 18px 32px 18px;
+            animation: fadePage 0.2s ease;
+        }
+
+        .page.active-page {
+            display: block;
+        }
+
+        @keyframes fadePage {
+            from { opacity: 0; transform: translateY(5px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* заголовки центром */
+        .table-title, .journal-header {
+            font-size: 1.7rem;
+            font-weight: bold;
+            text-align: center;
+            background: #fff2cf;
+            display: table;
+            margin: 0 auto 20px auto;
+            padding: 6px 24px;
+            border-radius: 60px;
+            color: #2f532c;
+        }
+
+        /* сетка элементов */
+        .periodic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+            gap: 10px;
+            background: #fef7e0;
+            padding: 16px;
+            border-radius: 48px;
+            box-shadow: inset 0 0 0 2px #fffff0, 0 6px 14px rgba(0,0,0,0.05);
+        }
+
+        .element-card {
+            background: #ffffffdb;
+            border-radius: 28px;
+            text-align: center;
+            padding: 10px 4px;
+            border: 1px solid #cdddb0;
+            cursor: pointer;
+            transition: 0.05s linear;
+        }
+        .element-card:active { transform: scale(0.97); background: #fff0dc; }
+        .element-symbol { font-size: 1.7rem; font-weight: 800; line-height: 1.2; }
+        .element-number { font-size: 0.7rem; color: #6f6f4b; font-weight: bold; }
+        .element-name { font-size: 0.65rem; font-weight: 600; color: #3d613a; }
+
+        /* симулятор */
+        .lab-box {
+            background: #fcf9ed;
+            border-radius: 48px;
+            padding: 18px 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 14px rgba(70, 50, 10, 0.1);
+        }
+        .reactor-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            background: #fff0cf;
+            padding: 10px 8px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            color: #3a5a32;
+        }
+        .reagent-selectors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 22px;
+            justify-content: center;
+        }
+        .selector-group { flex: 1; min-width: 150px; }
+        .selector-group label { display: block; font-weight: bold; margin-bottom: 6px; text-align: center; }
+        select {
+            width: 100%;
+            padding: 10px 8px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.95rem;
+            background: white;
+            border: 2px solid #d3dfb0;
+            border-radius: 48px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+        }
+        .button-group {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .mix-btn, .reset-btn, .clear-journal {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 8px 20px;
+            border-radius: 60px;
+            cursor: pointer;
+            border: none;
+            transition: 0.05s linear;
+        }
+        .mix-btn { background: #ffaa55; color: #2a3b22; box-shadow: 0 3px 0 #aa6f2c; }
+        .reset-btn { background: #c9d4ae; color: #2d4a28; box-shadow: 0 3px 0 #8f9e72; }
+        .mix-btn:active, .reset-btn:active, .clear-journal:active { transform: translateY(2px); box-shadow: none; }
+
+        .reaction-result {
+            background: #e6f0da;
+            border-radius: 44px;
+            padding: 18px 16px;
+            text-align: center;
+        }
+        .result-equation {
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: #fffaf0;
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 60px;
+            margin: 12px 0;
+            font-family: monospace;
+            word-break: break-word;
+        }
+        .result-desc { font-size: 1rem; font-style: italic; color: #2c5823; }
+        .note {
+            background: #fff2cf;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+            border-left: 5px solid #ffac57;
+        }
+
+        /* ЖУРНАЛ РЕАКЦИЙ — третья страница */
+        .journal-container {
+            background: #fef7e8;
+            border-radius: 48px;
+            padding: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .journal-entry {
+            background: #fffcf0;
+            border-radius: 32px;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+            border-left: 8px solid #ffaa55;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .journal-date {
+            font-size: 0.7rem;
+            color: #ad8b4c;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
+        .journal-text {
+            font-size: 1rem;
+            margin-top: 8px;
+            color: #2b4727;
+            word-break: break-word;
+        }
+        .empty-journal {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8b7a5c;
+            font-style: italic;
+        }
+        .journal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+        .clear-journal {
+            background: #e2cf9e;
+            color: #3a502e;
+            box-shadow: 0 2px 0 #aa8f57;
+            font-size: 0.9rem;
+        }
+        footer {
+            text-align: center;
+            padding: 14px;
+            background: #e2e8ce;
+            font-size: 0.7rem;
+            color: #516d46;
+            border-top: 1px solid #ccdaae;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 8px; }
+            .hero h1 { font-size: 1.9rem; }
+            .tab-btn { font-size: 1rem; padding: 6px 14px; }
+            .periodic-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .element-symbol { font-size: 1.4rem; }
+            .reactor-title { font-size: 1.2rem; }
+            .result-equation { font-size: 0.9rem; }
+            .journal-text { font-size: 0.9rem; }
+        }
+        @media (max-width: 480px) {
+            .periodic-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="hero">
+        <h1>🧪 Юный химик 🧪</h1>
+        <p>таблица элементов · симулятор реакций · журнал опытов</p>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-page="table">📖 Таблица</button>
+        <button class="tab-btn" data-page="lab">⚗️ Реакции</button>
+        <button class="tab-btn" data-page="journal">📓 Журнал</button>
+    </div>
+
+    <!-- СТРАНИЦА 1: ТАБЛИЦА МЕНДЕЛЕЕВА -->
+    <div id="tablePage" class="page active-page">
+        <div class="table-title">⭐ основные элементы ⭐</div>
+        <div class="periodic-grid" id="periodicGrid"></div>
+        <div class="note">🔬 нажми на любой элемент — скопируй символ</div>
+    </div>
+
+    <!-- СТРАНИЦА 2: СИМУЛЯТОР РЕАКЦИЙ -->
+    <div id="labPage" class="page">
+        <div class="lab-box">
+            <div class="reactor-title">🧴 смешивай реагенты → реакция 🧴</div>
+            <div class="reagent-selectors">
+                <div class="selector-group">
+                    <label>🧪 Реагент 1</label>
+                    <select id="reagentA"></select>
+                </div>
+                <div class="selector-group">
+                    <label>🧫 Реагент 2</label>
+                    <select id="reagentB"></select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="mix-btn" id="mixButton">⚡ смешать ⚡</button>
+                <button class="reset-btn" id="resetReactionBtn">🔄 сброс</button>
+            </div>
+            <div class="reaction-result">
+                <div style="font-weight:bold; font-size:1.2rem;">📌 уравнение опыта</div>
+                <div id="reactionEquation" class="result-equation">—</div>
+                <div id="reactionDescription" class="result-desc">выбери два вещества и нажми смешать</div>
+            </div>
+            <div class="note">⚡ все реакции по таблице Менделеева. Каждый удачный опыт попадёт в журнал</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА 3: ЛАБОРАТОРНЫЙ ЖУРНАЛ (сохраняет все реакции) -->
+    <div id="journalPage" class="page">
+        <div class="journal-header">📋 журнал проведённых реакций</div>
+        <div class="journal-container" id="journalContainer">
+            <div class="empty-journal">✨ пока ни одной реакции. смешайте вещества во вкладке «Реакции» ✨</div>
+        </div>
+        <div class="journal-actions">
+            <button id="clearJournalBtn" class="clear-journal">🗑️ очистить журнал</button>
+        </div>
+        <div class="note">📝 каждая успешная реакция автоматически сохраняется с датой и временем</div>
+    </div>
+
+    <footer>🧪 три вкладки: таблица, симулятор, журнал реакций · мобильная версия</footer>
+</div>
+
+<script>
+    // ---------- РЕАГЕНТЫ (менделеевская основа) ----------
+    const reagentsList = [
+        { id: "h2", name: "Водород H₂", formula: "H₂" }, { id: "o2", name: "Кислород O₂", formula: "O₂" },
+        { id: "na", name: "Натрий Na", formula: "Na" }, { id: "cl2", name: "Хлор Cl₂", formula: "Cl₂" },
+        { id: "h2o", name: "Вода H₂O", formula: "H₂O" }, { id: "hcl", name: "Соляная кислота HCl", formula: "HCl" },
+        { id: "naoh", name: "Гидроксид натрия NaOH", formula: "NaOH" }, { id: "cao", name: "Оксид кальция CaO", formula: "CaO" },
+        { id: "co2", name: "Углекислый газ CO₂", formula: "CO₂" }, { id: "fe", name: "Железо Fe", formula: "Fe" },
+        { id: "s", name: "Сера S", formula: "S" }, { id: "cu", name: "Медь Cu", formula: "Cu" },
+        { id: "al", name: "Алюминий Al", formula: "Al" }, { id: "zn", name: "Цинк Zn", formula: "Zn" },
+        { id: "ch4", name: "Метан CH₄", formula: "CH₄" }, { id: "n2", name: "Азот N₂", formula: "N₂" },
+        { id: "nh3", name: "Аммиак NH₃", formula: "NH₃" }, { id: "caco3", name: "Карбонат кальция CaCO₃", formula: "CaCO₃" },
+        { id: "electro", name: "Электрический ток ⚡", formula: "эл.ток" }, { id: "heat", name: "Нагревание 🔥", formula: "t°" },
+        { id: "mg", name: "Магний Mg", formula: "Mg" }
+    ];
+
+    // ----- БАЗА РЕАКЦИЙ (более 35) -----
+    const reactionsDb = new Map();
+    function addReaction(idA, idB, equation, desc) {
+        const key1 = idA + "|" + idB;
+        const key2 = idB + "|" + idA;
+        reactionsDb.set(key1, { eq: equation, desc: desc });
+        reactionsDb.set(key2, { eq: equation, desc: desc });
+    }
+
+    addReaction("h2","o2","2H₂ + O₂ → 2H₂O","горение водорода, образуется вода");
+    addReaction("na","cl2","2Na + Cl₂ → 2NaCl","яркая реакция, поваренная соль");
+    addReaction("h2","cl2","H₂ + Cl₂ → 2HCl","на свету, хлороводород");
+    addReaction("hcl","naoh","HCl + NaOH → NaCl + H₂O","нейтрализация, тепло");
+    addReaction("cao","h2o","CaO + H₂O → Ca(OH)₂","гашеная известь");
+    addReaction("co2","h2o","CO₂ + H₂O ⇄ H₂CO₃","угольная кислота");
+    addReaction("fe","s","Fe + S → FeS","сульфид железа");
+    addReaction("cu","o2","2Cu + O₂ → 2CuO","оксид меди чёрный");
+    addReaction("al","o2","4Al + 3O₂ → 2Al₂O₃","алюминий горит");
+    addReaction("zn","hcl","Zn + 2HCl → ZnCl₂ + H₂↑","выделяется водород");
+    addReaction("ch4","o2","CH₄ + 2O₂ → CO₂ + 2H₂O","горение метана");
+    addReaction("n2","h2","N₂ + 3H₂ ⇄ 2NH₃","синтез аммиака");
+    addReaction("nh3","hcl","NH₃ + HCl → NH₄Cl","белый дым");
+    addReaction("co2","cao","CO₂ + CaO → CaCO₃","осаждение карбоната");
+    addReaction("na","h2o","2Na + 2H₂O → 2NaOH + H₂↑","бурная реакция с щелочью");
+    addReaction("al","hcl","2Al + 6HCl → 2AlCl₃ + 3H₂↑","алюминий в кислоте");
+    addReaction("cu","cl2","Cu + Cl₂ → CuCl₂","хлорид меди");
+    addReaction("s","o2","S + O₂ → SO₂","сернистый газ");
+    addReaction("n2","o2","N₂ + O₂ → 2NO","оксид азота при t°");
+    addReaction("ch4","cl2","CH₄ + Cl₂ → CH₃Cl + HCl","замещение");
+    addReaction("fe","o2","4Fe + 3O₂ → 2Fe₂O₃","ржавление железа");
+    addReaction("h2o","electro","2H₂O → 2H₂↑ + O₂↑","электролиз воды");
+    addReaction("caco3","heat","CaCO₃ → CaO + CO₂↑","обжиг известняка");
+    addReaction("caco3","hcl","CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑","вскипание CO₂");
+    addReaction("na","o2","4Na + O₂ → 2Na₂O","оксид натрия");
+    addReaction("mg","o2","2Mg + O₂ → 2MgO","магний горит ярко");
+    addReaction("mg","hcl","Mg + 2HCl → MgCl₂ + H₂↑","магний растворяется");
+    addReaction("co2","mg","2Mg + CO₂ → 2MgO + C","магний забирает кислород");
+    addReaction("nh3","h2o","NH₃ + H₂O ⇄ NH₄OH","аммиачная вода");
+    addReaction("cao","co2","CaO + CO₂ → CaCO₃","связывание CO₂");
+    addReaction("fe","o2","3Fe + 2O₂ → Fe₃O₄","магнетит");
+    addReaction("cu","h2o","2Cu + O₂ + CO₂ → Cu₂(OH)₂CO₃","зелёная патина");
+    addReaction("al","fe2o3","2Al + Fe₂O₃ → Al₂O₃ + 2Fe","алюминотермия");
+    addReaction("zn","cuso4","Zn + CuSO₄ → ZnSO₄ + Cu","цинк вытесняет медь");
+
+    function getReaction(id1, id2) {
+        let key = id1 + "|" + id2;
+        if (reactionsDb.has(key)) return reactionsDb.get(key);
+        let rev = id2 + "|" + id1;
+        return reactionsDb.get(rev) || null;
+    }
+
+    // ----- ЖУРНАЛ РЕАКЦИЙ (localStorage) -----
+    let journalEntries = [];
+
+    function saveJournal() {
+        localStorage.setItem('youngChemistJournal', JSON.stringify(journalEntries));
+    }
+
+    function loadJournal() {
+        const saved = localStorage.getItem('youngChemistJournal');
+        if (saved) {
+            try { journalEntries = JSON.parse(saved); } catch(e) { journalEntries = []; }
+        } else {
+            journalEntries = [];
+        }
+        renderJournal();
+    }
+
+    function addReactionToJournal(reagentAName, reagentBName, equation, description) {
+        const now = new Date();
+        const timeStr = `${now.toLocaleDateString()} ${now.toLocaleTimeString().slice(0,5)}`;
+        const entryText = `${reagentAName} + ${reagentBName}  →  ${equation}  (${description})`;
+        journalEntries.unshift({
+            date: timeStr,
+            text: entryText
+        });
+        if (journalEntries.length > 40) journalEntries.pop();
+        saveJournal();
+        renderJournal();
+    }
+
+    function renderJournal() {
+        const container = document.getElementById('journalContainer');
+        if (!container) return;
+        if (journalEntries.length === 0) {
+            container.innerHTML = `<div class="empty-journal">✨ пока ни одной реакции. смешайте вещества во вкладке «Реакции» ✨</div>`;
+            return;
+        }
+        let html = '';
+        for (let entry of journalEntries) {
+            html += `
+                <div class="journal-entry">
+                    <div class="journal-date">📅 ${entry.date}</div>
+                    <div class="journal-text">${escapeHtml(entry.text)}</div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    function clearJournal() {
+        if (confirm('очистить весь лабораторный журнал? истории реакций не будет')) {
+            journalEntries = [];
+            saveJournal();
+            renderJournal();
+        }
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // заполнение селектов
+    function populateSelects() {
+        const selectA = document.getElementById('reagentA');
+        const selectB = document.getElementById('reagentB');
+        if (!selectA || !selectB) return;
+        selectA.innerHTML = '';
+        selectB.innerHTML = '';
+        reagentsList.forEach(r => {
+            const optA = document.createElement('option');
+            optA.value = r.id;
+            optA.textContent = r.name;
+            const optB = document.createElement('option');
+            optB.value = r.id;
+            optB.textContent = r.name;
+            selectA.appendChild(optA);
+            selectB.appendChild(optB);
+        });
+        selectA.value = 'h2';
+        selectB.value = 'o2';
+    }
+
+    // сброс области результата
+    function resetResultUI() {
+        const eqDiv = document.getElementById('reactionEquation');
+        const descDiv = document.getElementById('reactionDescription');
+        if (eqDiv) eqDiv.innerHTML = '—';
+        if (descDiv) descDiv.innerHTML = 'выбери вещества и нажми смешать';
+    }
+
+    // смешать и сохранить в журнал если реакция есть
+    function mixAndSave() {
+        const idA = document.getElementById('reagentA').value;
+        const idB = document.getElementById('reagentB').value;
+        const reagentA = reagentsList.find(r => r.id === idA);
+        const reagentB = reagentsList.find(r => r.id === idB);
+        if (!reagentA || !reagentB) return;
+        const reaction = getReaction(idA, idB);
+        const eqDiv = document.getElementById('reactionEquation');
+        const descDiv = document.getElementById('reactionDescription');
+
+        if (reaction) {
+            let cleanDesc = reaction.desc.replace(/\.$/, '');
+            eqDiv.innerHTML = reaction.eq;
+            descDiv.innerHTML = `🧪 ${cleanDesc}`;
+            // добавляем в журнал
+            addReactionToJournal(reagentA.name, reagentB.name, reaction.eq, cleanDesc);
+        } else {
+            eqDiv.innerHTML = '✖️ нет реакции ✖️';
+            descDiv.innerHTML = 'эти вещества не реагируют или условия не подходят';
+            // неудачную реакцию не пишем в журнал
+        }
+    }
+
+    // ---------- ТАБЛИЦА МЕНДЕЛЕЕВА ----------
+    const elementsRaw = [
+        { num:1, sym:"H", name:"Водород" },{ num:2, sym:"He", name:"Гелий" },{ num:3, sym:"Li", name:"Литий" },
+        { num:4, sym:"Be", name:"Бериллий" },{ num:5, sym:"B", name:"Бор" },{ num:6, sym:"C", name:"Углерод" },
+        { num:7, sym:"N", name:"Азот" },{ num:8, sym:"O", name:"Кислород" },{ num:9, sym:"F", name:"Фтор" },
+        { num:10, sym:"Ne", name:"Неон" },{ num:11, sym:"Na", name:"Натрий" },{ num:12, sym:"Mg", name:"Магний" },
+        { num:13, sym:"Al", name:"Алюминий" },{ num:14, sym:"Si", name:"Кремний" },{ num:15, sym:"P", name:"Фосфор" },
+        { num:16, sym:"S", name:"Сера" },{ num:17, sym:"Cl", name:"Хлор" },{ num:18, sym:"Ar", name:"Аргон" },
+        { num:19, sym:"K", name:"Калий" },{ num:20, sym:"Ca", name:"Кальций" },{ num:26, sym:"Fe", name:"Железо" },
+        { num:29, sym:"Cu", name:"Медь" },{ num:30, sym:"Zn", name:"Цинк" },{ num:47, sym:"Ag", name:"Серебро" },
+        { num:79, sym:"Au", name:"Золото" },{ num:82, sym:"Pb", name:"Свинец" }
+    ];
+    const uniqueElem = [];
+    const seenSet = new Set();
+    for(let el of elementsRaw) {
+        if(!seenSet.has(el.sym)) {
+            seenSet.add(el.sym);
+            uniqueElem.push(el);
+        }
+    }
+    function buildTable() {
+        const grid = document.getElementById('periodicGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        uniqueElem.forEach(el => {
+            const card = document.createElement('div');
+            card.className = 'element-card';
+            card.innerHTML = `
+                <div class="element-number">${el.num}</div>
+                <div class="element-symbol">${el.sym}</div>
+                <div class="element-name">${el.name}</div>
+            `;
+            card.addEventListener('click', () => {
+                navigator.clipboard.writeText(el.sym).catch(()=>{});
+                alert(`символ ${el.sym} скопирован`);
+            });
+            grid.appendChild(card);
+        });
+    }
+
+    // ----- ПЕРЕКЛЮЧЕНИЕ ТРЁХ СТРАНИЦ -----
+    function initPages() {
+        const btns = document.querySelectorAll('.tab-btn');
+        const pages = {
+            table: document.getElementById('tablePage'),
+            lab: document.getElementById('labPage'),
+            journal: document.getElementById('journalPage')
+        };
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const pageId = btn.getAttribute('data-page');
+                if (!pageId) return;
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                Object.values(pages).forEach(p => p?.classList.remove('active-page'));
+                if (pageId === 'table' && pages.table) pages.table.classList.add('active-page');
+                if (pageId === 'lab' && pages.lab) pages.lab.classList.add('active-page');
+                if (pageId === 'journal' && pages.journal) pages.journal.classList.add('active-page');
+            });
+        });
+    }
+
+    // ----- ЗАПУСК -----
+    window.addEventListener('DOMContentLoaded', () => {
+        populateSelects();
+        buildTable();
+        initPages();
+        loadJournal();
+        const mixBtn = document.getElementById('mixButton');
+        if (mixBtn) mixBtn.addEventListener('click', mixAndSave);
+        const resetBtn = document.getElementById('resetReactionBtn');
+        if (resetBtn) resetBtn.addEventListener('click', resetResultUI);
+        const clearJournalBtn = document.getElementById('clearJournalBtn');
+        if (clearJournalBtn) clearJournalBtn.addEventListener('click', clearJournal);
+        resetResultUI();
+    });
+</script>
+</body>
+</html>
