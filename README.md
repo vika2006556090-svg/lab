@@ -366,7 +366,7 @@
         { id: "al", name: "Алюминий Al", formula: "Al" }, { id: "zn", name: "Цинк Zn", formula: "Zn" },
         { id: "ch4", name: "Метан CH₄", formula: "CH₄" }, { id: "n2", name: "Азот N₂", formula: "N₂" },
         { id: "nh3", name: "Аммиак NH₃", formula: "NH₃" }, { id: "caco3", name: "Карбонат кальция CaCO₃", formula: "CaCO₃" },
-        { id: "electro", name: "Электрический ток ⚡", formula: "эл.ток" }, { id: "heat", name: "Нагревание 🔥", formula: "t°" },
+        { id: "electro", name: "Электрический ток ", formula: "эл.ток" }, { id: "heat", name: "Нагревание ", formula: "t°" },
         { id: "mg", name: "Магний Mg", formula: "Mg" }
     ];
 
@@ -619,6 +619,4 @@
 </script>
 </body>
 </html>
-git mv image.png image.html
-git commit -m "переименован файл из png в html"
-git push
+
